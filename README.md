@@ -22,6 +22,30 @@ Este é um projeto universitário para as disciplinas de Engenharia de Software 
 
 ## Como clonar ou baixar
 
+### Clonar via HTTPS
+
+```bash
+git clone https://github.com/PedronSol/Documento-Unificado-de-Saude-DUS-.git
+```
+
+Clonar por este método criará uma cópia local deste repositório em sua máquina.
+
+### Clonar via SSH (Apenas se houver chave SSH configurada no GitHub)
+
+```bash
+git clone git@github.com:PedronSol/Documento-Unificado-de-Saude-DUS-.git
+```
+
+Clonar por este método criará uma cópia local deste repositório em sua máquina.
+
+### Baixar como ZIP
+
+1. Acesse a página do repositório no GitHub:
+   [https://github.com/PedronSol/Documento-Unificado-de-Saude-DUS-](https://github.com/PedronSol/Documento-Unificado-de-Saude-DUS-)
+2. Clique no botão **Code** (verde).
+3. Selecione **Download ZIP**.
+4. Extraia o arquivo ZIP para o local desejado em seu computador.
+
 ## Estrutura do Projeto
 
 ## Licença
