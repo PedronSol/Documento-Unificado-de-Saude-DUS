@@ -2,6 +2,7 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import List, Optional
+from pathlib import Path
 import json
 app = FastAPI(
     title="API - Documento Unificado de Saúde",
@@ -46,7 +47,7 @@ class Pacientes(BaseModel):
 # ====================================================================
 # 3. ROTAS DA API
 # ====================================================================
-DB_PATH = './db.json'
+DB_PATH = Path(__file__).parent / 'db.json'
 
 def read_db() -> dict:
     with open(DB_PATH, 'r', encoding='utf-8') as f:
