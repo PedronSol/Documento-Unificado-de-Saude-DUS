@@ -1,5 +1,5 @@
 import pytest
-from main import getUser
+from backend.main_r import getUser
 
 
 def test_usuario_existente():

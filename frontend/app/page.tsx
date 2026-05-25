@@ -1,5 +1,6 @@
 "use client"
 
+import { useEffect, useState } from "react"
 import { ThemeProvider } from "@/components/health-passport/theme-provider"
 import { Header } from "@/components/health-passport/header"
 import { QRCard } from "@/components/health-passport/qr-card"
@@ -8,109 +9,144 @@ import { MedicalAlerts } from "@/components/health-passport/medical-alerts"
 import { DigitalDocuments } from "@/components/health-passport/digital-documents"
 import { BottomNavigation } from "@/components/health-passport/bottom-navigation"
 
-// Dados de exemplo para demonstração
-const userData = {
-  name: "Maria Silva Santos",
-  avatar: undefined,
-  healthStatus: "updated" as const,
-  fullName: "Maria Silva Santos",
-  universalId: "BR-2024-7829-4561",
-  bloodType: "O+",
-  qrValue: "https://saude.gov.br/passport/BR-2024-7829-4561",
+// ─── Tipos que espelham o retorno do FastAPI (snake_case) ────────────────────
+
+type PerfilCompleto = {
+  id: string
+  nome: string
+  foto?: string
+  tipo_sanguineo: string
+  convenio: string
 }
 
-const vaccineData = [
-  {
-    id: "1",
-    name: "COVID-19 (Pfizer)",
-    dose: "3ª Dose - Reforço",
-    date: "15/03/2024",
-    status: "applied" as const,
-  },
-  {
-    id: "2",
-    name: "Influenza",
-    dose: "Dose Anual",
-    date: "20/04/2024",
-    status: "applied" as const,
-  },
-  {
-    id: "3",
-    name: "Febre Amarela",
-    dose: "Dose Única",
-    date: "10/01/2023",
-    status: "applied" as const,
-  },
-  {
-    id: "4",
-    name: "Hepatite B",
-    dose: "3ª Dose",
-    status: "pending" as const,
-  },
-  {
-    id: "5",
-    name: "Tétano (dT)",
-    dose: "Reforço",
-    status: "overdue" as const,
-  },
-]
+type VacinaAPI = {
+  id: string
+  nome_vacina: string
+  dose: string
+  data_aplicacao: string | null
+  status: "applied" | "pending" | "overdue"
+}
 
-const alertsData = [
-  {
-    id: "1",
-    type: "allergy" as const,
-    title: "Alergia a Penicilina",
-    description: "Reação anafilática severa. Evitar todos os antibióticos beta-lactâmicos.",
-    severity: "high" as const,
-  },
-  {
-    id: "2",
-    type: "condition" as const,
-    title: "Diabetes Tipo 2",
-    description: "Diagnóstico em 2019. Controlada com medicação oral.",
-    severity: "medium" as const,
-  },
-  {
-    id: "3",
-    type: "medication" as const,
-    title: "Metformina 850mg",
-    description: "Uso contínuo, 2x ao dia após refeições.",
-    severity: "low" as const,
-  },
-]
+type DocumentoAPI = {
+  id: string
+  titulo: string
+  tipo: "exam" | "prescription" | "report"
+  data: string
+  status: "new" | "viewed"
+}
 
-const documentsData = [
-  {
-    id: "1",
-    title: "Hemograma Completo",
-    type: "exam" as const,
-    date: "05/05/2024",
-    status: "new" as const,
-  },
-  {
-    id: "2",
-    title: "Receita - Dr. João Mendes",
-    type: "prescription" as const,
-    date: "28/04/2024",
-    status: "viewed" as const,
-  },
-  {
-    id: "3",
-    title: "Laudo Cardiológico",
-    type: "report" as const,
-    date: "15/04/2024",
-    status: "viewed" as const,
-  },
-  {
-    id: "4",
-    title: "Glicemia em Jejum",
-    type: "exam" as const,
-    date: "01/04/2024",
-    status: "viewed" as const,
-  },
-]
+type AlertaAPI = {
+  id: string
+  tipo: "allergy" | "condition" | "medication"
+  titulo: string
+  descricao: string
+  severidade: "high" | "medium" | "low"
+}
+
+// ─── URL base da API ──────────────────────────────────────────────────────────
+
+const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "https://super-xylophone-g47qwvxq7pghv4px-8000.app.github.dev"
+
+// ID do paciente logado — no futuro virá do contexto de autenticação
+const PACIENTE_ID = "usr-001"
+
+// ─── Helper de fetch ──────────────────────────────────────────────────────────
+
+async function apiFetch<T>(path: string): Promise<T> {
+  const res = await fetch(`${API_BASE}${path}`)
+  if (!res.ok) throw new Error(`Erro ${res.status} em ${path}`)
+  return res.json()
+}
+
+// ─── Página principal ─────────────────────────────────────────────────────────
 
 export default function HealthPassportPage() {
+  const [perfil,    setPerfil]    = useState<PerfilCompleto | null>(null)
+  const [vacinas,   setVacinas]   = useState<VacinaAPI[]>([])
+  const [documentos,setDocumentos]= useState<DocumentoAPI[]>([])
+  const [alertas,   setAlertas]   = useState<AlertaAPI[]>([])
+  const [loading,   setLoading]   = useState(true)
+  const [erro,      setErro]      = useState<string | null>(null)
+
+  useEffect(() => {
+    async function carregarTudo() {
+      try {
+        const base = `/api/pacientes/${PACIENTE_ID}`
+        const [p, v, d, a] = await Promise.all([
+          apiFetch<PerfilCompleto>(`${base}/perfil-completo`),
+          apiFetch<VacinaAPI[]>   (`${base}/vacinas`),
+          apiFetch<DocumentoAPI[]>(`${base}/documentos`),
+          apiFetch<AlertaAPI[]>   (`${base}/alertas`),
+        ])
+        setPerfil(p)
+        setVacinas(v)
+        setDocumentos(d)
+        setAlertas(a)
+      } catch (e) {
+        setErro(e instanceof Error ? e.message : "Erro desconhecido")
+      } finally {
+        setLoading(false)
+      }
+    }
+    carregarTudo()
+  }, [])
+
+  if (loading) {
+    return (
+      <ThemeProvider>
+        <div className="min-h-screen flex items-center justify-center bg-background">
+          <p className="text-muted-foreground animate-pulse">Carregando perfil...</p>
+        </div>
+      </ThemeProvider>
+    )
+  }
+
+  if (erro || !perfil) {
+    return (
+      <ThemeProvider>
+        <div className="min-h-screen flex items-center justify-center bg-background">
+          <p className="text-destructive">Falha ao carregar: {erro}</p>
+        </div>
+      </ThemeProvider>
+    )
+  }
+
+  // ─── Mapeia snake_case da API → props dos componentes ─────────────────────
+
+  const userData = {
+    name:         perfil.nome,
+    avatar:       perfil.foto,
+    healthStatus: "updated" as const,
+    fullName:     perfil.nome,
+    universalId:  perfil.id,
+    bloodType:    perfil.tipo_sanguineo,
+    qrValue:      `${API_BASE}/api/pacientes/${perfil.id}/perfil-completo`,
+  }
+
+  const vacinasFormatadas = vacinas.map((v) => ({
+    id:     v.id,
+    name:   v.nome_vacina,
+    dose:   v.dose,
+    date:   v.data_aplicacao ?? undefined,
+    status: v.status,
+  }))
+
+  const documentosFormatados = documentos.map((d) => ({
+    id:     d.id,
+    title:  d.titulo,
+    type:   d.tipo,
+    date:   d.data,
+    status: d.status,
+  }))
+
+  const alertasFormatados = alertas.map((a) => ({
+    id:          a.id,
+    type:        a.tipo,
+    title:       a.titulo,
+    description: a.descricao,
+    severity:    a.severidade,
+  }))
+
   return (
     <ThemeProvider>
       <div className="min-h-screen bg-background pb-24">
@@ -121,7 +157,6 @@ export default function HealthPassportPage() {
         />
 
         <main className="container max-w-lg mx-auto px-4 py-6 space-y-6">
-          {/* Hero Card com QR Code */}
           <QRCard
             fullName={userData.fullName}
             universalId={userData.universalId}
@@ -129,20 +164,13 @@ export default function HealthPassportPage() {
             qrValue={userData.qrValue}
           />
 
-          {/* Grid de Funcionalidades */}
           <div className="space-y-6">
-            {/* Alertas Médicos - Prioridade visual */}
-            <MedicalAlerts alerts={alertsData} />
-
-            {/* Histórico de Vacinação */}
-            <VaccinationHistory vaccines={vaccineData} />
-
-            {/* Documentos Digitais */}
-            <DigitalDocuments documents={documentsData} />
+            <MedicalAlerts    alerts={alertasFormatados}     />
+            <VaccinationHistory vaccines={vacinasFormatadas} />
+            <DigitalDocuments documents={documentosFormatados} />
           </div>
         </main>
 
-        {/* Bottom Navigation */}
         <BottomNavigation />
       </div>
     </ThemeProvider>

@@ -98,6 +98,30 @@
       "atualizado_em": "2025-05-01T16:45:00Z"
     }
   ],
+  "vacinas": [
+    { "id": "vac-001", "paciente_id": "usr-001", "nome_vacina": "COVID-19 (Pfizer)", "dose": "3ª Dose - Reforço", "data_aplicacao": "15/03/2024", "status": "applied" },
+    { "id": "vac-002", "paciente_id": "usr-001", "nome_vacina": "Influenza",         "dose": "Dose Anual",        "data_aplicacao": "20/04/2024", "status": "applied" },
+    { "id": "vac-003", "paciente_id": "usr-001", "nome_vacina": "Febre Amarela",     "dose": "Dose Única",        "data_aplicacao": "10/01/2023", "status": "applied" },
+    { "id": "vac-004", "paciente_id": "usr-001", "nome_vacina": "Hepatite B",        "dose": "3ª Dose",           "data_aplicacao": null,         "status": "pending" },
+    { "id": "vac-005", "paciente_id": "usr-001", "nome_vacina": "Tétano (dT)",       "dose": "Reforço",           "data_aplicacao": null,         "status": "overdue" },
+    { "id": "vac-006", "paciente_id": "usr-002", "nome_vacina": "BCG",               "dose": "Dose Única",        "data_aplicacao": "22/07/2012", "status": "applied" },
+    { "id": "vac-007", "paciente_id": "usr-002", "nome_vacina": "Pentavalente",      "dose": "3ª Dose",           "data_aplicacao": "15/10/2012", "status": "applied" },
+    { "id": "vac-008", "paciente_id": "usr-002", "nome_vacina": "Influenza",         "dose": "Dose Anual",        "data_aplicacao": null,         "status": "overdue" }
+  ],
+  "documentos": [
+    { "id": "doc-001", "paciente_id": "usr-001", "titulo": "Hemograma Completo",        "tipo": "exam",         "data": "05/05/2024", "status": "new"    },
+    { "id": "doc-002", "paciente_id": "usr-001", "titulo": "Receita - Dr. João Mendes", "tipo": "prescription", "data": "28/04/2024", "status": "viewed" },
+    { "id": "doc-003", "paciente_id": "usr-001", "titulo": "Laudo Cardiológico",        "tipo": "report",       "data": "15/04/2024", "status": "viewed" },
+    { "id": "doc-004", "paciente_id": "usr-001", "titulo": "Glicemia em Jejum",         "tipo": "exam",         "data": "01/04/2024", "status": "viewed" },
+    { "id": "doc-005", "paciente_id": "usr-002", "titulo": "Cartão de Vacinação",       "tipo": "report",       "data": "10/03/2024", "status": "new"    },
+    { "id": "doc-006", "paciente_id": "usr-002", "titulo": "Receita Pediátrica",        "tipo": "prescription", "data": "02/05/2024", "status": "viewed" }
+  ],
+  "alertas": [
+    { "id": "alt-001", "paciente_id": "usr-001", "tipo": "allergy",   "titulo": "Alergia a Penicilina", "descricao": "Reação anafilática severa. Evitar todos os antibióticos beta-lactâmicos.", "severidade": "high"   },
+    { "id": "alt-002", "paciente_id": "usr-001", "tipo": "condition", "titulo": "Diabetes Tipo 2",      "descricao": "Diagnóstico em 2019. Controlada com medicação oral.",                      "severidade": "medium" },
+    { "id": "alt-003", "paciente_id": "usr-001", "tipo": "medication","titulo": "Metformina 850mg",     "descricao": "Uso contínuo, 2x ao dia após refeições.",                                  "severidade": "low"    },
+    { "id": "alt-004", "paciente_id": "usr-002", "tipo": "allergy",   "titulo": "Alergia a Dipirona",   "descricao": "Urticária generalizada. Evitar uso em crianças.",                           "severidade": "high"   }
+  ],
   "sessoes": [
     {
       "token": "abc123xyz789",
