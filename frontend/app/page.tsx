@@ -45,10 +45,10 @@ type AlertaAPI = {
 
 // ─── URL base da API ──────────────────────────────────────────────────────────
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "https://super-xylophone-g47qwvxq7pghv4px-8000.app.github.dev"
+const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://127.0.0.1:8000"
 
 // ID do paciente logado — no futuro virá do contexto de autenticação
-const PACIENTE_ID = "usr-002"
+const PACIENTE_ID = "usr-001"
 
 // ─── Helper de fetch ──────────────────────────────────────────────────────────
 

@@ -2,7 +2,7 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import List, Optional
-from backend.database import supabase
+from database import supabase
 
 app = FastAPI(
     title="API - Documento Unificado de Saúde",
