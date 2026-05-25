@@ -1,0 +1,29 @@
+name: CI - Testes Automáticos
+
+on:
+  push:
+    branches: [ "main", "develop_rinaldo" ]
+  pull_request:
+    branches: [ "main" ]
+
+  workflow_dispatch:
+
+jobs:
+  testes-backend:
+    name: Rodar Testes do Backend (pytest)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout do repositório
+        uses: actions/checkout@v4
+
+      - name: Configurar Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Instalar dependências
+        run: pip install -r requirements.txt
+
+      - name: Rodar testes com pytest
+        run: pytest backend/test_db.py -v
