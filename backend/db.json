@@ -1,0 +1,116 @@
+{
+  "usuarios": [
+    {
+      "id": "usr-001",
+      "nome": "Ana Clara Souza",
+      "foto": "fotos/ana_clara.jpg",
+      "cpf": "123.456.789-00",
+      "senha_hash": "$2b$12$exampleHashAna",
+      "data_nascimento": "1990-03-15",
+      "tipo_sanguineo": "A+",
+      "convenio": "Unimed",
+      "contato_emergencia": {
+        "nome": "Carlos Souza",
+        "telefone": "(84) 99876-5432",
+        "parentesco": "Irmão"
+      },
+      "sexo": "Feminino",
+      "telefone": "(84) 98765-4321",
+      "email": "ana.clara@email.com",
+      "papel": "paciente",
+      "menor_de_idade": false,
+      "guardioes": [],
+      "usuarios_autorizados": ["usr-003"],
+      "sessao_ativa": null,
+      "criado_em": "2025-01-10T08:00:00Z",
+      "atualizado_em": "2025-05-20T14:30:00Z"
+    },
+    {
+      "id": "usr-002",
+      "nome": "Pedro Henrique Lima",
+      "foto": "fotos/pedro_henrique.jpg",
+      "cpf": "987.654.321-00",
+      "senha_hash": "$2b$12$exampleHashPedro",
+      "data_nascimento": "2012-07-22",
+      "tipo_sanguineo": "O-",
+      "convenio": "Hapvida",
+      "contato_emergencia": {
+        "nome": "Mariana Lima",
+        "telefone": "(84) 91234-5678",
+        "parentesco": "Mãe"
+      },
+      "sexo": "Masculino",
+      "telefone": "(84) 91234-5678",
+      "email": "mariana.lima@email.com",
+      "papel": "paciente",
+      "menor_de_idade": true,
+      "guardioes": ["usr-004"],
+      "usuarios_autorizados": ["usr-003", "usr-004"],
+      "sessao_ativa": null,
+      "criado_em": "2025-02-05T10:15:00Z",
+      "atualizado_em": "2025-05-18T09:00:00Z"
+    },
+    {
+      "id": "usr-003",
+      "nome": "Dra. Fernanda Rocha",
+      "foto": "fotos/fernanda_rocha.jpg",
+      "cpf": "111.222.333-44",
+      "senha_hash": "$2b$12$exampleHashFernanda",
+      "data_nascimento": "1982-11-05",
+      "tipo_sanguineo": "B+",
+      "convenio": "Particular",
+      "contato_emergencia": null,
+      "sexo": "Feminino",
+      "telefone": "(84) 93333-2222",
+      "email": "fernanda.rocha@clinica.com",
+      "papel": "medico",
+      "menor_de_idade": false,
+      "guardioes": [],
+      "usuarios_autorizados": [],
+      "sessao_ativa": null,
+      "criado_em": "2024-12-01T07:30:00Z",
+      "atualizado_em": "2025-04-10T11:00:00Z"
+    },
+    {
+      "id": "usr-004",
+      "nome": "Mariana Lima",
+      "foto": "fotos/mariana_lima.jpg",
+      "cpf": "555.666.777-88",
+      "senha_hash": "$2b$12$exampleHashMariana",
+      "data_nascimento": "1985-09-30",
+      "tipo_sanguineo": "AB+",
+      "convenio": "Hapvida",
+      "contato_emergencia": {
+        "nome": "Roberto Lima",
+        "telefone": "(84) 99000-1111",
+        "parentesco": "Cônjuge"
+      },
+      "sexo": "Feminino",
+      "telefone": "(84) 91234-5678",
+      "email": "mariana.lima@email.com",
+      "papel": "guardiao",
+      "menor_de_idade": false,
+      "guardioes": [],
+      "usuarios_autorizados": [],
+      "tutelados": ["usr-002"],
+      "sessao_ativa": null,
+      "criado_em": "2025-02-05T10:00:00Z",
+      "atualizado_em": "2025-05-01T16:45:00Z"
+    }
+  ],
+  "sessoes": [
+    {
+      "token": "abc123xyz789",
+      "usuario_id": "usr-001",
+      "criado_em": "2025-05-25T08:00:00Z",
+      "expira_em": "2025-05-25T20:00:00Z",
+      "ativa": true
+    }
+  ],
+  "enums": {
+    "tipos_sanguineos": ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"],
+    "sexos": ["Masculino", "Feminino", "Não-binário", "Prefiro não informar"],
+    "papeis": ["paciente", "medico", "guardiao"],
+    "convenios": ["Unimed", "Hapvida", "SulAmérica", "Bradesco Saúde", "Amil", "Particular", "SUS", "Outro"]
+  }
+}

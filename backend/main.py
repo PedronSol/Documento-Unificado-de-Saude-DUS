@@ -1,23 +1,28 @@
-from enum import Enum
+import json
 
-from fastapi import FastAPI
-
-
-class UserName(str, Enum):
-    alexnet = "alexnet"
-    resnet = "resnet"
-    lenet = "lenet"
-
+from fastapi import FastAPI, HTTPException
 
 app = FastAPI()
 
+DB_PATH = './db.json'
 
-@app.get("/models/{model_name}")
-async def get_model(model_name: UserName):
-    if model_name is UserName.alexnet:
-        return {"user_name": model_name, "message": "Deep Learning FTW!"}
 
-    if model_name.value == "lenet":
-        return {"user_name": model_name, "message": "LeCNN all the images"}
+def read_db() -> dict:
+    with open(DB_PATH, 'r', encoding='utf-8') as f:
+        return json.load(f)
 
-    return {"user_name": model_name, "message": "Have some residuals"}
+
+def getUser(user_id: str) -> dict | None:
+    db = read_db()
+    for usuario in db['usuarios']:
+        if usuario['id'] == user_id:
+            return usuario
+    return None
+
+
+@app.get("/users/{user_id}")
+async def get_user(user_id: str):
+    usuario = getUser(user_id)
+    if usuario is None:
+        raise HTTPException(status_code=404, detail="Usuário não encontrado")
+    return usuario
