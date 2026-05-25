@@ -2,8 +2,8 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import List, Optional
-from pathlib import Path
-import json
+from backend.database import supabase
+
 app = FastAPI(
     title="API - Documento Unificado de Saúde",
     description="Backend para centralização de informações médicas"
@@ -11,23 +11,18 @@ app = FastAPI(
 
 # ====================================================================
 # 1. CONFIGURAÇÃO DO CORS
-# Isso avisa ao navegador que o frontend do seu grupo tem permissão 
-# para conversar com esta API sem ser bloqueado.
 # ====================================================================
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"], # Em produção..., trocar o "*" pelo link do frontend
-    allow_credentials=False, # Não pode ser True quando allow_origins=["*"]
-    allow_methods=["*"], # Permite GET, POST, PUT, DELETE...
+    allow_origins=["*"],    # Em produção, trocar pelo link do frontend
+    allow_credentials=False,
+    allow_methods=["*"],
     allow_headers=["*"],
 )
 
 # ====================================================================
-# 2. MODELOS PYDANTIC 
-# Essas classes garantem que vão enviar lixo para o banco de dados.
-# Se o front enviar um alerta sem "titulo", o FastAPI bloqueia na hora.
+# 2. MODELOS PYDANTIC
 # ====================================================================
-
 class AlertaMedicoCadastro(BaseModel):
     titulo: str
     nivel: str
@@ -36,70 +31,114 @@ class AlertaMedicoCadastro(BaseModel):
 class VacinaCadastro(BaseModel):
     nome_vacina: str
     dose: str
-    data_aplicacao: Optional[str] = None # Optional que pode vir vazio (Pendente)
+    data_aplicacao: Optional[str] = None
     status: str
 
 class Pacientes(BaseModel):
     nome_Paciente: str
     tipo_sanguineo: str
-    contato_emergencia: Optional[str] = None # Optional que pode vir vazio (Pendente)
+    contato_emergencia: Optional[str] = None
     docu_status: str
-# ====================================================================
-# 3. ROTAS DA API
-# ====================================================================
-DB_PATH = Path(__file__).parent / 'db.json'
 
-def read_db() -> dict:
-    with open(DB_PATH, 'r', encoding='utf-8') as f:
-        return json.load(f)
+# ====================================================================
+# 3. FUNÇÕES DE ACESSO AO BANCO (Supabase)
+# ====================================================================
 
 def getUser(user_id: str) -> dict | None:
-    db = read_db()
-    for usuario in db['usuarios']:
-        if usuario['id'] == user_id:
-            return usuario
+    """Busca um usuário pelo ID. Retorna None se não encontrado."""
+    resultado = (
+        supabase.table("usuarios")
+        .select("*")
+        .eq("id", user_id)
+        .execute()
+    )
+    if resultado.data:
+        return resultado.data[0]
     return None
 
 
-# Rota de Leitura (GET) - A que já tínhamos feito
-@app.get("/api/pacientes/{paciente_id}/perfil-completo")
+def obter_vacinas(paciente_id: str) -> list:
+    """Retorna todas as vacinas de um paciente."""
+    resultado = (
+        supabase.table("vacinas")
+        .select("*")
+        .eq("paciente_id", paciente_id)
+        .execute()
+    )
+    return resultado.data
 
-def obter_perfil_completo(paciente_id: str):
+
+def obter_documentos(paciente_id: str) -> list:
+    """Retorna todos os documentos de um paciente."""
+    resultado = (
+        supabase.table("documentos")
+        .select("*")
+        .eq("paciente_id", paciente_id)
+        .execute()
+    )
+    return resultado.data
+
+
+def obter_alertas(paciente_id: str) -> list:
+    """Retorna todos os alertas de um paciente."""
+    resultado = (
+        supabase.table("alertas")
+        .select("*")
+        .eq("paciente_id", paciente_id)
+        .execute()
+    )
+    return resultado.data
+
+
+# ====================================================================
+# 4. ROTAS DA API
+# ====================================================================
+
+@app.get("/api/pacientes/{paciente_id}/perfil-completo")
+def rota_perfil_completo(paciente_id: str):
     usuario = getUser(paciente_id)
     if usuario is None:
         raise HTTPException(status_code=404, detail="Usuário não encontrado")
-    
     return {**usuario, "status": "Sucesso"}
-    
+
+
 @app.get("/api/pacientes/{paciente_id}/vacinas")
-def obter_vacinas(paciente_id: str):
+def rota_vacinas(paciente_id: str):
     if getUser(paciente_id) is None:
         raise HTTPException(status_code=404, detail="Usuário não encontrado")
-    db = read_db()
-    vacinas = [v for v in db["vacinas"] if v["paciente_id"] == paciente_id]
-    return vacinas
+    return obter_vacinas(paciente_id)
+
 
 @app.get("/api/pacientes/{paciente_id}/documentos")
-def obter_documentos(paciente_id: str):
+def rota_documentos(paciente_id: str):
     if getUser(paciente_id) is None:
         raise HTTPException(status_code=404, detail="Usuário não encontrado")
-    db = read_db()
-    documentos = [d for d in db["documentos"] if d["paciente_id"] == paciente_id]
-    return documentos
+    return obter_documentos(paciente_id)
+
 
 @app.get("/api/pacientes/{paciente_id}/alertas")
-def obter_alertas(paciente_id: str):
+def rota_alertas(paciente_id: str):
     if getUser(paciente_id) is None:
         raise HTTPException(status_code=404, detail="Usuário não encontrado")
-    db = read_db()
-    alertas = [a for a in db["alertas"] if a["paciente_id"] == paciente_id]
-    return alertas
+    return obter_alertas(paciente_id)
 
-# Rota de Escrita (POST) - Usando nosso modelo Pydantic!
+
 @app.post("/api/pacientes/{paciente_id}/alertas")
 def adicionar_alerta(paciente_id: str, novo_alerta: AlertaMedicoCadastro):
+    if getUser(paciente_id) is None:
+        raise HTTPException(status_code=404, detail="Usuário não encontrado")
 
+    import uuid
+    dados = {
+        "id": f"alt-{uuid.uuid4().hex[:8]}",
+        "paciente_id": paciente_id,
+        "tipo": "condition",
+        "titulo": novo_alerta.titulo,
+        "descricao": novo_alerta.descricao,
+        "severidade": novo_alerta.nivel,
+    }
+    supabase.table("alertas").insert(dados).execute()
     return {
         "mensagem": f"Alerta '{novo_alerta.titulo}' cadastrado com sucesso para o paciente {paciente_id}!",
-        "dados_recebidos": novo_alerta
+        "dados_recebidos": novo_alerta,
     }

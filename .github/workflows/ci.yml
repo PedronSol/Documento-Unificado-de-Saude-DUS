@@ -13,6 +13,12 @@ jobs:
     name: Rodar Testes do Backend (pytest)
     runs-on: ubuntu-latest
 
+    # Injeta as credenciais do Supabase como variáveis de ambiente
+    # Configure em: GitHub → Settings → Secrets and variables → Actions
+    env:
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+
     steps:
       - name: Checkout do repositório
         uses: actions/checkout@v4
