@@ -1,10 +1,12 @@
-from fastapi import FastAPI, HTTPException, Depends
-from fastapi.security import OAuth2PasswordRequestForm
-from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
 from datetime import date
-from typing import List, Optional
+from typing import List, Optional, Union
+from fastapi import FastAPI, HTTPException, Depends, status
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.security import OAuth2PasswordRequestForm
+from pydantic import BaseModel
 import mysql.connector
+import bcrypt
+import os
 
 app = FastAPI(title="Passaporte de Saúde - API com CRUD Completo")
 
@@ -17,10 +19,11 @@ app.add_middleware(
 )
 
 def get_db_connection():
+    banco_host = os.getenv("DB_HOST", "db")
     try:
         connection = mysql.connector.connect(
-            host="db",
-            port=3306,
+            host=banco_host,
+            port=3306 if banco_host == "db" else 3307,
             user="root",
             password="root",
             database="passaporte_saude",
