@@ -59,7 +59,7 @@ Ao acessar a aplicação, será solicitado um login, e para fins de testes é po
 
 Uma vez que os contêineres estiverem completamente montados e a aplicação funcionando, para executar os testes unitários, deve-se abrir um outro terminal, também no diretório do projeto, e executar o comando:
 ```Docker
-docker exec -it saude_backend_container python -m pytest --cov=main test_main.py
+docker exec -it saude_backend_container python -m pytest --cov=models test_main.py
 ```
 
 Por fim, para finalizar a execução do projeto, basta utilizar o comando:

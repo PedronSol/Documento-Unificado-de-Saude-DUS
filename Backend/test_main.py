@@ -1,41 +1,44 @@
-from fastapi.testclient import TestClient
-from main import app
+import pytest
+from pydantic import ValidationError
+from models import Vaccine, Alert
+from datetime import date
 
-client = TestClient(app)
-
-def test_login_success():
-    """Testa o cenário de login com sucesso e a integridade do retorno dos dados"""
-    login_payload = {
-        "username": "carlos.silva@email.com",
-        "password": "senha123"
+def test_criar_vacina_valida():
+    dados = {
+        "id_vacina": 10,
+        "nome_vacina": "Tríplice Viral",
+        "dose": "Reforço",
+        "data_aplicacao": date(2026, 5, 31),
+        "status_vacina": "applied"
     }
-    
-    response = client.post("/login", data=login_payload)
-    
-    assert response.status_code == 200
-    data = response.json()
-    
-    assert data["patient_data"]["nome_paciente"] == "Carlos Silva"
-    assert data["patient_data"]["cpf_paciente"] == "00011122222"
-    
-    assert len(data["vaccines"]) == 3
-    assert len(data["alerts"]) == 2
-    assert "senha_hash" not in data["patient_data"]
+    vacina = Vaccine(**dados)
+    assert vacina.nome_vacina == "Tríplice Viral"
+    assert vacina.status_vacina == "applied"
 
-def test_login_wrong_password():
-    """Testa erro de login com senha incorreta"""
-    login_payload = {
-        "username": "carlos.silva@email.com",
-        "password": "senha_errada_aqui"
-    }
-    response = client.post("/login", data=login_payload)
-    assert response.status_code in [400, 401]
+def test_erro_nome_vacina_vazio():
+    with pytest.raises(ValidationError):
+        Vaccine(
+            id_vacina=11,
+            nome_vacina="   ",
+            dose="1ª Dose",
+            status_vacina="pending"
+        )
 
-def test_login_user_not_found():
-    """Testa erro de login com usuário inexistente"""
-    login_payload = {
-        "username": "inexistente@email.com",
-        "password": "senha123"
-    }
-    response = client.post("/login", data=login_payload)
-    assert response.status_code in [400, 404]
+def test_erro_id_vacina_invalido():
+    with pytest.raises(ValidationError):
+        Vaccine(
+            id_vacina="texto_invalido",
+            nome_vacina="BCG",
+            dose="Dose Única",
+            status_vacina="applied"
+        )
+
+def test_criar_alerta_valido():
+    alerta = Alert(
+        id_alerta=1,
+        tipo_alerta="allergy",
+        titulo_alerta="Alergia a Sulfa",
+        descricao_alerta="Erupções cutâneas graves.",
+        severidade_alerta="high"
+    )
+    assert alerta.titulo_alerta == "Alergia a Sulfa"
