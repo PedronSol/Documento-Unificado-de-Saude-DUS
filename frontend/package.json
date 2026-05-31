@@ -1,12 +1,14 @@
 {
-  "name": "my-project",
+  "name": "passaporte_universal_de_saude",
   "version": "0.1.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "test": "playwright test",
+    "test:report": "playwright show-report"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.1",
@@ -62,6 +64,7 @@
     "zod": "^3.24.1"
   },
   "devDependencies": {
+    "@playwright/test": "^1.60.0",
     "@tailwindcss/postcss": "^4.2.0",
     "@types/node": "^22",
     "@types/react": "^19",

@@ -1,98 +1,90 @@
-from fastapi import FastAPI, HTTPException
+import json
+import uuid
+from pathlib import Path
+from fastapi import FastAPI, HTTPException, Form
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from typing import List, Optional
-from database import supabase
+from typing import Optional
 
 app = FastAPI(
     title="API - Documento Unificado de Saúde",
     description="Backend para centralização de informações médicas"
 )
 
-# ====================================================================
-# 1. CONFIGURAÇÃO DO CORS
-# ====================================================================
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],    # Em produção, trocar pelo link do frontend
+    allow_origins=["*"],
     allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
+_DATA_FILE = Path(__file__).parent / "mock_data.json"
+with open(_DATA_FILE, encoding="utf-8") as f:
+    _db = json.load(f)
+
+
 # ====================================================================
-# 2. MODELOS PYDANTIC
+# MODELOS PYDANTIC
 # ====================================================================
+
 class AlertaMedicoCadastro(BaseModel):
     titulo: str
     nivel: str
     descricao: str
 
 class VacinaCadastro(BaseModel):
+    id_vacina: Optional[str] = None
     nome_vacina: str
     dose: str
     data_aplicacao: Optional[str] = None
-    status: str
+    status_vacina: str
 
-class Pacientes(BaseModel):
-    nome_Paciente: str
-    tipo_sanguineo: str
-    contato_emergencia: Optional[str] = None
-    docu_status: str
 
 # ====================================================================
-# 3. FUNÇÕES DE ACESSO AO BANCO (Supabase)
+# FUNÇÕES DE ACESSO AO MOCK
 # ====================================================================
 
-def getUser(user_id: str) -> dict | None:
-    """Busca um usuário pelo ID. Retorna None se não encontrado."""
-    resultado = (
-        supabase.table("usuarios")
-        .select("*")
-        .eq("id", user_id)
-        .execute()
-    )
-    if resultado.data:
-        return resultado.data[0]
+def getUser(cpf: str) -> dict | None:
+    for p in _db["pacientes"]:
+        if p["cpf_paciente"] == cpf:
+            return p
     return None
 
 
-def obter_vacinas(paciente_id: str) -> list:
-    """Retorna todas as vacinas de um paciente."""
-    resultado = (
-        supabase.table("vacinas")
-        .select("*")
-        .eq("paciente_id", paciente_id)
-        .execute()
-    )
-    return resultado.data
+def obter_vacinas(cpf: str) -> list:
+    return [v for v in _db["vacinas"] if v["paciente_id"] == cpf]
 
 
-def obter_documentos(paciente_id: str) -> list:
-    """Retorna todos os documentos de um paciente."""
-    resultado = (
-        supabase.table("documentos")
-        .select("*")
-        .eq("paciente_id", paciente_id)
-        .execute()
-    )
-    return resultado.data
+def obter_documentos(cpf: str) -> list:
+    return [d for d in _db["documentos"] if d["paciente_id"] == cpf]
 
 
-def obter_alertas(paciente_id: str) -> list:
-    """Retorna todos os alertas de um paciente."""
-    resultado = (
-        supabase.table("alertas")
-        .select("*")
-        .eq("paciente_id", paciente_id)
-        .execute()
-    )
-    return resultado.data
+def obter_alertas(cpf: str) -> list:
+    return [a for a in _db["alertas"] if a["paciente_id"] == cpf]
 
 
 # ====================================================================
-# 4. ROTAS DA API
+# ROTAS DA API
 # ====================================================================
+
+@app.post("/login")
+def login(username: str = Form(...), password: str = Form(...)):
+    paciente = next(
+        (p for p in _db["pacientes"] if p["email"] == username and p["senha_hash"] == password),
+        None,
+    )
+    if paciente is None:
+        raise HTTPException(status_code=401, detail="E-mail ou senha incorretos.")
+
+    cpf = paciente["cpf_paciente"]
+    return {
+        "patient_data": paciente,
+        "vaccines": obter_vacinas(cpf),
+        "alerts": obter_alertas(cpf),
+        "documents": obter_documentos(cpf),
+    }
+
 
 @app.get("/api/pacientes/{paciente_id}/perfil-completo")
 def rota_perfil_completo(paciente_id: str):
@@ -127,18 +119,61 @@ def rota_alertas(paciente_id: str):
 def adicionar_alerta(paciente_id: str, novo_alerta: AlertaMedicoCadastro):
     if getUser(paciente_id) is None:
         raise HTTPException(status_code=404, detail="Usuário não encontrado")
-
-    import uuid
-    dados = {
-        "id": f"alt-{uuid.uuid4().hex[:8]}",
+    novo = {
+        "id_alerta": f"alt-{uuid.uuid4().hex[:8]}",
         "paciente_id": paciente_id,
-        "tipo": "condition",
-        "titulo": novo_alerta.titulo,
-        "descricao": novo_alerta.descricao,
-        "severidade": novo_alerta.nivel,
+        "tipo_alerta": "condition",
+        "titulo_alerta": novo_alerta.titulo,
+        "descricao_alerta": novo_alerta.descricao,
+        "severidade_alerta": novo_alerta.nivel,
     }
-    supabase.table("alertas").insert(dados).execute()
-    return {
-        "mensagem": f"Alerta '{novo_alerta.titulo}' cadastrado com sucesso para o paciente {paciente_id}!",
-        "dados_recebidos": novo_alerta,
+    _db["alertas"].append(novo)
+    return {"mensagem": f"Alerta '{novo_alerta.titulo}' cadastrado com sucesso!"}
+
+
+@app.post("/patients/{paciente_id}/vaccines")
+def adicionar_vacina(paciente_id: str, vacina: VacinaCadastro):
+    if getUser(paciente_id) is None:
+        raise HTTPException(status_code=404, detail="Usuário não encontrado")
+    nova = {
+        "id_vacina": vacina.id_vacina or uuid.uuid4().hex[:8],
+        "paciente_id": paciente_id,
+        "nome_vacina": vacina.nome_vacina,
+        "dose": vacina.dose,
+        "data_aplicacao": vacina.data_aplicacao,
+        "status_vacina": vacina.status_vacina,
     }
+    _db["vacinas"].append(nova)
+    return nova
+
+
+@app.put("/patients/{paciente_id}/vaccines/{vacina_id}")
+def editar_vacina(paciente_id: str, vacina_id: str, vacina: VacinaCadastro):
+    if getUser(paciente_id) is None:
+        raise HTTPException(status_code=404, detail="Usuário não encontrado")
+    for i, v in enumerate(_db["vacinas"]):
+        if v["paciente_id"] == paciente_id and v["id_vacina"] == vacina_id:
+            _db["vacinas"][i] = {
+                "id_vacina": vacina_id,
+                "paciente_id": paciente_id,
+                "nome_vacina": vacina.nome_vacina,
+                "dose": vacina.dose,
+                "data_aplicacao": vacina.data_aplicacao,
+                "status_vacina": vacina.status_vacina,
+            }
+            return _db["vacinas"][i]
+    raise HTTPException(status_code=404, detail="Vacina não encontrada")
+
+
+@app.delete("/patients/{paciente_id}/vaccines/{vacina_id}")
+def deletar_vacina(paciente_id: str, vacina_id: str):
+    if getUser(paciente_id) is None:
+        raise HTTPException(status_code=404, detail="Usuário não encontrado")
+    antes = len(_db["vacinas"])
+    _db["vacinas"] = [
+        v for v in _db["vacinas"]
+        if not (v["paciente_id"] == paciente_id and v["id_vacina"] == vacina_id)
+    ]
+    if len(_db["vacinas"]) == antes:
+        raise HTTPException(status_code=404, detail="Vacina não encontrada")
+    return {"mensagem": "Vacina removida com sucesso"}
