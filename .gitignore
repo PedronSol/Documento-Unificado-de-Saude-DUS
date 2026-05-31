@@ -25,6 +25,9 @@ share/python-wheels/
 .installed.cfg
 *.egg
 MANIFEST
+dev/cache/
+*.sst
+*.log
 
 node_modules
 .next
