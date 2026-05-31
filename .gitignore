@@ -18,3 +18,4 @@ playwright-report/
 # OS
 .DS_Store
 *.log
+frontend/dev/
