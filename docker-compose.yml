@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   db:
     image: mysql:8.0
@@ -14,7 +12,7 @@ services:
     volumes:
       - ./db:/docker-entrypoint-initdb.d
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-psua_senha"]
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot"]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -35,3 +33,22 @@ services:
       - "3000:3000"
     depends_on:
       - backend
+
+  playwright:
+    build: ./FrontEnd
+    container_name: saude_playwright_container
+    volumes:
+      - ./FrontEnd/tests:/app/tests
+    command: >
+      sh -c "
+        echo 'Aguardando frontend iniciar...' &&
+        until curl -sf http://frontend:3000 > /dev/null; do sleep 3; done &&
+        echo 'Frontend pronto! Rodando testes...' &&
+        npx playwright test --reporter=list
+      "
+    environment:
+      - PLAYWRIGHT_BASE_URL=http://frontend:3000
+    depends_on:
+      - frontend
+    profiles:
+      - test

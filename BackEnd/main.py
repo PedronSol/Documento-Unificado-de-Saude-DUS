@@ -20,10 +20,11 @@ app.add_middleware(
 
 def get_db_connection():
     banco_host = os.getenv("DB_HOST", "db")
+    banco_port = int(os.getenv("DB_PORT", "3306" if banco_host == "db" else "3307"))
     try:
         connection = mysql.connector.connect(
             host=banco_host,
-            port=3306 if banco_host == "db" else 3307,
+            port=banco_port,
             user="root",
             password="root",
             database="passaporte_saude",
@@ -90,7 +91,7 @@ def login(form_data: OAuth2PasswordRequestForm = Depends()):
     if not paciente or form_data.password != paciente["senha_hash"]:
         cursor.close()
         conn.close()
-        raise HTTPException(status_code=400, detail="E-mail ou senha incorretos.")
+        raise HTTPException(status_code=401, detail="E-mail ou senha incorretos.")
 
     cpf = paciente["cpf_paciente"]
 

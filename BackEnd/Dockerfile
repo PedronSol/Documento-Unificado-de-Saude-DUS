@@ -5,7 +5,8 @@ ENV LC_ALL=C.UTF-8
 
 WORKDIR /app
 
-RUN pip install --no-cache-dir fastapi uvicorn mysql-connector-python pydantic python-multipart bcrypt pytest httpx pytest-cov
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
