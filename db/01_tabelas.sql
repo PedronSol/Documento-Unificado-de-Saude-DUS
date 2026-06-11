@@ -18,7 +18,8 @@ CREATE TABLE
         status_saude ENUM ('updated', 'pending', 'overdue'),
         tipo_sanguineo ENUM ('A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'),
         valor_qr VARCHAR(255),
-        criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        data_nascimento DATE NOT NULL
     );
 
 CREATE TABLE

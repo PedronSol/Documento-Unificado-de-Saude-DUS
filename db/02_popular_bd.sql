@@ -9,7 +9,8 @@ INSERT IGNORE INTO pacientes (
     avatar,
     status_saude,
     tipo_sanguineo,
-    valor_qr
+    valor_qr,
+    data_nascimento
 )
 VALUES
     (
@@ -21,7 +22,8 @@ VALUES
         null,
         'updated',
         'A+',
-        'https://saude.gov.br/passport/000.111.222-22'
+        'https://saude.gov.br/passport/000.111.222-22',
+        '1985-04-12'
     ),
     (
         '11122233344',
@@ -32,7 +34,8 @@ VALUES
         null,
         'pending',
         'O-',
-        'https://saude.gov.br/passport/111.222.333-44'
+        'https://saude.gov.br/passport/111.222.333-44',
+        '2021-07-11'
     ),
     (
         '12345678900',
@@ -43,7 +46,8 @@ VALUES
         null,
         'overdue',
         'B+',
-        'https://saude.gov.br/passport/123.456.789-00'
+        'https://saude.gov.br/passport/123.456.789-00',
+        '1993-09-25'
     ),
     (
         '00111223401',
@@ -54,7 +58,8 @@ VALUES
         null,
         'updated',
         'AB+',
-        'https://saude.gov.br/passport/001.112.234-01'
+        'https://saude.gov.br/passport/001.112.234-01',
+        '2002-11-02'
     ),
     (
         '14235486778',
@@ -65,7 +70,8 @@ VALUES
         null,
         'pending',
         'O+',
-        'https://saude.gov.br/passport/142.354.867-78'
+        'https://saude.gov.br/passport/142.354.867-78',
+        '1976-01-30'
     ),
     (
         '11111111111',
@@ -76,7 +82,8 @@ VALUES
         null,
         'updated',
         'A-',
-        'https://saude.gov.br/passport/111.111.111-11'
+        'https://saude.gov.br/passport/111.111.111-11',
+        '1999-12-05'
     ),
     (
         '98765432111',
@@ -87,7 +94,8 @@ VALUES
         null,
         'overdue',
         'B-',
-        'https://saude.gov.br/passport/987.654.321-11'
+        'https://saude.gov.br/passport/987.654.321-11',
+        '2010-06-15'
     ),
     (
         '11123423298',
@@ -98,7 +106,8 @@ VALUES
         null,
         'updated',
         'O+',
-        'https://saude.gov.br/passport/111.234.232-98'
+        'https://saude.gov.br/passport/111.234.232-98',
+        '1988-08-21'
     ),
     (
         '00000000001',
@@ -109,7 +118,8 @@ VALUES
         null,
         'pending',
         'AB-',
-        'https://saude.gov.br/passport/000.000.000-01'
+        'https://saude.gov.br/passport/000.000.000-01',
+        '1964-03-14'
     ),
     (
         '12312312312',
@@ -120,7 +130,8 @@ VALUES
         null,
         'updated',
         'A+',
-        'https://saude.gov.br/passport/12312312312'
+        'https://saude.gov.br/passport/12312312312',
+        '2005-05-19'
     );
 
 INSERT IGNORE INTO vacinas (

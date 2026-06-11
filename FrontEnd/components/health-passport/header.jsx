@@ -17,7 +17,7 @@ import { useTheme } from "@/components/health-passport/theme-provider";
 import { useRouter } from "next/navigation";
 import { useState, useRef, useEffect } from "react";
 
-export function Header({ userName, userAvatar, healthStatus, cpf }) {
+export function Header({ userName, userAvatar, healthStatus}) {
   const { theme, toggleTheme } = useTheme();
   const router = useRouter();
   const [showMenu, setShowMenu] = useState(false);
@@ -92,7 +92,7 @@ export function Header({ userName, userAvatar, healthStatus, cpf }) {
             </Avatar>
             <div className="flex flex-col text-left">
               <span className="text-sm lg:text-base font-medium text-foreground">
-                {userName} - {cpf}
+                {userName}
               </span>
               <Badge
                 className={`w-fit text-xs px-2 py-0.5 ${status.className}`}
