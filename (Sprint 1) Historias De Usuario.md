@@ -9,9 +9,9 @@ Prioridade: Alta
 Estimativa: 3 US
 
 Critérios de Aceitação:
-1. O usuário deve ser capaz de visualizar estruturadamente esses dados
+1. O usuário deve ser capaz de visualizar estruturadamente esses dados.
 2. Os dados precisam, cada um, ser armazenados em seus doimínio (tipos) específicos.
-3. Dados devem passar por uma validação (como e-mail, CPF e número de contato)
+3. Dados devem passar por uma validação (como e-mail, CPF e número de contato).
 
 ## US2 - Modificar Dados Pessoais
 
@@ -22,8 +22,8 @@ Prioridade: Alta
 Estimativa: 2 US
 
 Critérios de Aceitação:
-1. Não devem haver campos vazios
-2. Os dados alterados precisam substituir os dados antigos, tanto na visualização quanto no banco
+1. Não devem haver campos vazios.
+2. Os dados alterados precisam substituir os dados antigos, tanto na visualização quanto no banco.
 
 ## US3 - Autenticação do Usuário na Aplicação
 
@@ -34,7 +34,8 @@ Prioridade: Alta
 Estimativa: 3 US
 
 Critérios de Aceitação:
-1. Cada usuário deve ter associado a si um login (e-mail) e uma senha
-2. Um usuário não deve conseguir acessar os dados de outro sem que haja autorização
+1. Cada usuário deve ter associado a si um login (e-mail) e uma senha.
+2. Um usuário não deve conseguir acessar os dados de outro sem que haja autorização.
 3. O Login é único e não pode ser repetido.
-4. A sessão de conexão do usuário deve ser mantida até que ele se desconecte
+4. A sessão de conexão do usuário deve ser mantida até que ele se desconecte.
+5. Usuários menores de idade (idade < 18) não devem ser capazes de alterar os seus próprios dados.

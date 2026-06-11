@@ -64,6 +64,8 @@ class PatientProfile(BaseModel):
     status_saude: str
     tipo_sanguineo: str
     valor_qr: str
+    maior_de_idade: bool
+    idade: int
 
 class LoginResponse(BaseModel):
     message: str
@@ -92,6 +94,13 @@ def login(form_data: OAuth2PasswordRequestForm = Depends()):
         cursor.close()
         conn.close()
         raise HTTPException(status_code=401, detail="E-mail ou senha incorretos.")
+
+    data_nasc = paciente["data_nascimento"]
+    today = date.today()
+    idade_calculada = today.year - data_nasc.year - ((today.month, today.day) < (data_nasc.month, data_nasc.day))
+
+    paciente["maior_de_idade"] = idade_calculada >= 18
+    paciente["idade"] = idade_calculada
 
     cpf = paciente["cpf_paciente"]
 

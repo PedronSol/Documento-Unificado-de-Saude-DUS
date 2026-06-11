@@ -32,6 +32,13 @@ export default function HealthPassportPage() {
   const [dataAplicacao, setDataAplicacao] = useState("");
   const [statusVacina, setStatusVacina] = useState("applied");
 
+  const formatarCPF = (cpf) => {
+    if (!cpf) return "";
+    const cpfLimpo = cpf.replace(/\D/g, "");
+    if (cpfLimpo.length !== 11) return cpf;
+    return cpfLimpo.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
+  };
+
   useEffect(() => {
     const storedUser = sessionStorage.getItem("patient_data");
     const storedVaccines = sessionStorage.getItem("vaccines");
@@ -95,7 +102,9 @@ export default function HealthPassportPage() {
 
       if (!response.ok) throw new Error("Erro ao salvar dados da vacina.");
 
-      const refreshRes = await fetch(`http://localhost:8000/patients/${userData.cpf_paciente}/vaccines`);
+      const refreshRes = await fetch(
+        `http://localhost:8000/patients/${userData.cpf_paciente}/vaccines`,
+      );
       const freshVaccines = await refreshRes.json();
 
       setVaccineData(freshVaccines);
@@ -147,11 +156,34 @@ export default function HealthPassportPage() {
           userName={userData.nome_paciente}
           userAvatar={userData.avatar}
           healthStatus={userData.status_saude}
-          cpf={userData.cpf_paciente}
         />
 
         <main className="pb-16 lg:pb-8">
           <div className="container max-w-7xl mx-auto px-4 py-6 lg:px-8 lg:py-8">
+            <div className="mb-6 bg-card border border-border/50 rounded-2xl p-4 flex flex-wrap items-center justify-between gap-4 shadow-sm">
+              <div className="flex flex-wrap gap-6 text-sm text-muted-foreground">
+                <p>
+                  <strong>Nome Completo:</strong> {userData.nome_completo}
+                </p>
+                <p>
+                  <strong>CPF:</strong> {formatarCPF(userData.cpf_paciente)}
+                </p>
+                <p>
+                  <strong>Idade:</strong> {userData.idade} anos
+                </p>
+                <p>
+                  <strong>Tipo Sanguíneo:</strong> {userData.tipo_sanguineo}
+                </p>
+              </div>
+              <span
+                className={`text-xs font-medium px-2.5 py-1 rounded-lg ${userData.maior_de_idade ? "bg-emerald-500/10 text-emerald-500" : "bg-amber-500/10 text-amber-500"}`}
+              >
+                {userData.maior_de_idade
+                  ? "Acesso Completo (Adulto)"
+                  : "Acesso Restrito (Menor de Idade)"}
+              </span>
+            </div>
+
             <div className="space-y-6 lg:space-y-8 w-full">
               <MedicalAlerts alerts={alertsData} />
               <DigitalDocuments documents={documentsData} />
@@ -166,13 +198,15 @@ export default function HealthPassportPage() {
                       Gerencie o registro de vacinas aplicadas ou pendentes
                     </p>
                   </div>
-                  <button
-                    onClick={handleOpenAddModal}
-                    className="flex items-center gap-1 text-xs font-medium bg-primary text-primary-foreground px-3 h-9 rounded-xl hover:bg-primary/90 transition-colors"
-                  >
-                    <Plus className="w-4 h-4" />
-                    Adicionar Vacina
-                  </button>
+                  {userData.maior_de_idade && (
+                    <button
+                      onClick={handleOpenAddModal}
+                      className="flex items-center gap-1 text-xs font-medium bg-primary text-primary-foreground px-3 h-9 rounded-xl hover:bg-primary/90 transition-colors"
+                    >
+                      <Plus className="w-4 h-4" />
+                      Adicionar Vacina
+                    </button>
+                  )}
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -187,24 +221,26 @@ export default function HealthPassportPage() {
                             {vaccine.nome_vacina}
                           </h3>
 
-                          <div className="flex items-center gap-1 opacity-100 lg:opacity-0 group-hover:opacity-100 transition-opacity">
-                            <button
-                              onClick={() => handleOpenEditModal(vaccine)}
-                              className="p-1.5 text-muted-foreground hover:text-primary hover:bg-secondary rounded-lg transition-colors"
-                              title="Editar vacina"
-                            >
-                              <Edit2 className="w-3.5 h-3.5" />
-                            </button>
-                            <button
-                              onClick={() =>
-                                handleDeleteVaccine(vaccine.id_vacina)
-                              }
-                              className="p-1.5 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-lg transition-colors"
-                              title="Excluir vacina"
-                            >
-                              <Trash2 className="w-3.5 h-3.5" />
-                            </button>
-                          </div>
+                          {userData.maior_de_idade && (
+                            <div className="flex items-center gap-1 opacity-100 lg:opacity-0 group-hover:opacity-100 transition-opacity">
+                              <button
+                                onClick={() => handleOpenEditModal(vaccine)}
+                                className="p-1.5 text-muted-foreground hover:text-primary hover:bg-secondary rounded-lg transition-colors"
+                                title="Editar vacina"
+                              >
+                                <Edit2 className="w-3.5 h-3.5" />
+                              </button>
+                              <button
+                                onClick={() =>
+                                  handleDeleteVaccine(vaccine.id_vacina)
+                                }
+                                className="p-1.5 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-lg transition-colors"
+                                title="Excluir vacina"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
+                          )}
                         </div>
                         <p className="text-xs text-muted-foreground mb-1">
                           {vaccine.dose}
@@ -218,12 +254,13 @@ export default function HealthPassportPage() {
 
                       <div className="mt-4 flex items-center justify-between">
                         <span
-                          className={`inline-flex items-center gap-1 text-[11px] font-medium px-2.5 py-0.5 rounded-full ${vaccine.status_vacina === "applied"
-                            ? "bg-emerald-500/10 text-emerald-500"
-                            : vaccine.status_vacina === "pending"
-                              ? "bg-amber-500/10 text-amber-500"
-                              : "bg-rose-500/10 text-rose-500"
-                            }`}
+                          className={`inline-flex items-center gap-1 text-[11px] font-medium px-2.5 py-0.5 rounded-full ${
+                            vaccine.status_vacina === "applied"
+                              ? "bg-emerald-500/10 text-emerald-500"
+                              : vaccine.status_vacina === "pending"
+                                ? "bg-amber-500/10 text-amber-500"
+                                : "bg-rose-500/10 text-rose-500"
+                          }`}
                         >
                           {vaccine.status_vacina === "applied" ? (
                             <Check className="w-3 h-3" />
