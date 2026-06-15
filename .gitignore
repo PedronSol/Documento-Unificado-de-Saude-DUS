@@ -3,6 +3,8 @@ __pycache__/
 *.py[codz]
 *$py.class
 
+rodar_testes.sh
+
 # C extensions
 *.so
 
@@ -16,6 +18,7 @@ eggs/
 .eggs/
 lib/
 lib64/
+!FrontEnd/lib/
 parts/
 sdist/
 var/
@@ -25,6 +28,22 @@ share/python-wheels/
 .installed.cfg
 *.egg
 MANIFEST
+dev/cache/
+*.sst
+*.log
+
+node_modules
+.next
+out
+build
+.env*.local
+.venv
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache
+.coverage
 
 # PyInstaller
 #   Usually these files are written by a python script from a template
@@ -50,6 +69,9 @@ coverage.xml
 .hypothesis/
 .pytest_cache/
 cover/
+
+FrontEnd/playwright-report
+FrontEnd/playwright-report/*
 
 # Translations
 *.mo

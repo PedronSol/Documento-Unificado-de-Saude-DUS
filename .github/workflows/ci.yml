@@ -1,0 +1,88 @@
+name: CI - Testes Automáticos
+
+on:
+  push:
+    branches: [ "main", "develop" ]
+  pull_request:
+    branches: [ "main" ]
+
+  workflow_dispatch:
+
+jobs:
+  testes-backend:
+    name: Rodar Testes do Backend (pytest)
+    runs-on: ubuntu-latest
+
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: passaporte_saude
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h localhost -u root -proot"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
+
+    steps:
+      - name: Checkout do repositório
+        uses: actions/checkout@v4
+
+      - name: Configurar Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Instalar dependências Python
+        run: pip install -r BackEnd/requirements.txt
+
+      - name: Popular banco de dados
+        run: |
+          mysql -h 127.0.0.1 -P 3306 -u root -proot < db/01_tabelas.sql
+          mysql -h 127.0.0.1 -P 3306 -u root -proot passaporte_saude < db/02_popular_bd.sql
+
+      - name: Rodar testes com pytest
+        working-directory: BackEnd
+        env:
+          DB_HOST: 127.0.0.1
+          DB_PORT: 3306
+        run: pytest test_main.py -v
+
+  testes-frontend:
+    name: Rodar Testes do Frontend (Playwright)
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: FrontEnd
+
+    steps:
+      - name: Checkout do repositório
+        uses: actions/checkout@v4
+
+      - name: Configurar Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: FrontEnd/package-lock.json
+
+      - name: Instalar dependências
+        run: npm ci
+
+      - name: Instalar Playwright e dependências do sistema
+        run: npx playwright install --with-deps chromium
+
+      - name: Rodar testes Playwright
+        run: npm test
+
+      - name: Upload do relatório de testes
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-report
+          path: FrontEnd/playwright-report/
+          retention-days: 7
